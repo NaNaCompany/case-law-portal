@@ -2,7 +2,7 @@
 
 공식 출처와 재이용 조건을 확인한 판결문을 건별 HTML로 공개하는 정적 자료실.
 
-- 예정 URL: https://nanalab.kr/case-law-portal/
+- 공개 URL: https://nanalab.kr/case-law-portal/
 - 배포 대상: GitHub Pages, main 브랜치 루트, `.nojekyll`.
 - 전수 수집을 주장하지 않습니다. 실제 범위는 `publication.json`과 `sitemap.xml`.
 - 대한민국 공식 공개본부터 순차 수록합니다. 인도는 이용 조건·접근 경로 검토 후 확대합니다.
