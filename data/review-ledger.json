@@ -1,0 +1,153 @@
+{
+  "schemaVersion": 1,
+  "scope": "Unpublished review outcomes. URL digests only; no names, URLs or source content. This ledger does not schedule or authorize requests.",
+  "entries": [
+    {
+      "sourceUrlSha256": "081f67730ceb9f580e3ad9370aeb2beb7181b41e4845d91c74732e7181669132",
+      "status": "held-for-review",
+      "reasonCategory": "essential-visual-missing",
+      "reviewedAt": "2026-11-10T12:10:26.726755+00:00",
+      "automaticRetry": false
+    },
+    {
+      "sourceUrlSha256": "0a3083874e5df2d67f82cce72f76ab6ca2189484534034f1e9fd21443bbac719",
+      "status": "held-for-review",
+      "reasonCategory": "essential-visual-missing",
+      "reviewedAt": "2026-11-10T12:10:26.726755+00:00",
+      "automaticRetry": false
+    },
+    {
+      "sourceUrlSha256": "2f2b2c91b7b2adbed7e227969dd053ce0fae980bca0e91a25e2f1f11abb87897",
+      "status": "held-for-review",
+      "reasonCategory": "source-quality-review",
+      "reviewedAt": "2026-11-10T11:46:12.781234+00:00",
+      "automaticRetry": false
+    },
+    {
+      "sourceUrlSha256": "64b7f60ae20e58323a079bbb37ceba1c24cb1c177e31a9fca68bf61cd33bbffa",
+      "status": "held-for-review",
+      "reasonCategory": "incomplete-source",
+      "reviewedAt": "2026-11-10T10:58:13.076686+00:00",
+      "automaticRetry": false
+    },
+    {
+      "sourceUrlSha256": "681d14aab4b7ef851774ad704e94e76b0ab4799d2c42f602540691c262606e20",
+      "status": "held-for-review",
+      "reasonCategory": "incomplete-source",
+      "reviewedAt": "2026-11-10T12:10:26.726755+00:00",
+      "automaticRetry": false
+    },
+    {
+      "sourceUrlSha256": "77240b8a43a5307dae2820336e391d45f444e0c9d9d1e27b050cfa24830eb27d",
+      "status": "held-for-review",
+      "reasonCategory": "privacy-review",
+      "reviewedAt": "2026-11-10T11:53:12.866379+00:00",
+      "automaticRetry": false
+    },
+    {
+      "sourceUrlSha256": "8c96002962fe28053612f67a240ebb940f5c2a7c8ec499232fd0580c9c91c84b",
+      "status": "held-for-review",
+      "reasonCategory": "incomplete-source",
+      "reviewedAt": "2026-11-10T10:58:13.076686+00:00",
+      "automaticRetry": false
+    },
+    {
+      "sourceUrlSha256": "a05cbfebdf4887d5a8cdf77e00718686b772158ec496262d5f56cd39ecd5761f",
+      "status": "held-for-review",
+      "reasonCategory": "incomplete-source",
+      "reviewedAt": "2026-11-10T11:53:50.668684+00:00",
+      "automaticRetry": false
+    },
+    {
+      "sourceUrlSha256": "a4ef72ab8b25366bab8b4c4fb3d800b7339a37f4b29b0479755d76cc4e50cadc",
+      "status": "held-for-review",
+      "reasonCategory": "incomplete-source",
+      "reviewedAt": "2026-11-10T12:10:26.726755+00:00",
+      "automaticRetry": false
+    },
+    {
+      "sourceUrlSha256": "abee407cac908a246639cab68644db460e377332f9e942b2589d8728649fd9b9",
+      "status": "held-for-review",
+      "reasonCategory": "incomplete-source",
+      "reviewedAt": "2026-11-10T12:10:26.726755+00:00",
+      "automaticRetry": false
+    },
+    {
+      "sourceUrlSha256": "b12f1250514d6de167ceaad6bc3db146a1d432a1935b39813f955d21a22b7627",
+      "status": "held-for-review",
+      "reasonCategory": "incomplete-source",
+      "reviewedAt": "2026-11-10T10:45:14.647342+00:00",
+      "automaticRetry": false
+    },
+    {
+      "sourceUrlSha256": "b40717db961bc57a3cb72199f70d2ef21d8cdc69949a5ce203cd724187bf8174",
+      "status": "held-for-review",
+      "reasonCategory": "incomplete-source",
+      "reviewedAt": "2026-11-10T11:46:12.781234+00:00",
+      "automaticRetry": false
+    },
+    {
+      "sourceUrlSha256": "bc0c93117d280d21fbf9d8bae17898a23adf3457061968634dfd285ae7e8231b",
+      "status": "temporarily-unavailable",
+      "reasonCategory": "http-503",
+      "reviewedAt": "2026-11-10T12:07:52.931296+00:00",
+      "automaticRetry": false
+    },
+    {
+      "sourceUrlSha256": "c37def60e18efe433352b5109ed55483420adfe17f4796cf6717e6790f010216",
+      "status": "held-for-review",
+      "reasonCategory": "source-quality-review",
+      "reviewedAt": "2026-11-10T11:53:50.668684+00:00",
+      "automaticRetry": false
+    },
+    {
+      "sourceUrlSha256": "c4a4f8e1e3bdd9cdb88a37bdc8e57298e4337519a6a0f18ba0857708c3c44419",
+      "status": "held-for-review",
+      "reasonCategory": "incomplete-source",
+      "reviewedAt": "2026-11-10T12:10:26.726755+00:00",
+      "automaticRetry": false
+    },
+    {
+      "sourceUrlSha256": "ca92380683391586edd1074ccb5ac18f4986cc6e4f85f46cef9a987b1410fbc1",
+      "status": "held-for-review",
+      "reasonCategory": "privacy-review",
+      "reviewedAt": "2026-11-10T11:53:50.668684+00:00",
+      "automaticRetry": false
+    },
+    {
+      "sourceUrlSha256": "d909ae26d641803502487949e4eabade758790353e53b408807ae2499b482134",
+      "status": "held-for-review",
+      "reasonCategory": "essential-visual-missing",
+      "reviewedAt": "2026-11-10T12:10:26.726755+00:00",
+      "automaticRetry": false
+    },
+    {
+      "sourceUrlSha256": "dd327b3a76381ef1f363ed9845666bb9a4da63d81fd62d5a6bcbaaa0b4536601",
+      "status": "held-for-review",
+      "reasonCategory": "incomplete-source",
+      "reviewedAt": "2026-11-10T11:46:12.781234+00:00",
+      "automaticRetry": false
+    },
+    {
+      "sourceUrlSha256": "ebbbd0440397b8421fd089ee6ba18b790055c59696e81d8e9c09c13628e5e7d3",
+      "status": "held-for-review",
+      "reasonCategory": "incomplete-source",
+      "reviewedAt": "2026-11-10T11:46:12.781234+00:00",
+      "automaticRetry": false
+    },
+    {
+      "sourceUrlSha256": "f16b244febbc6d96cfdbfba8e99b92fa3f68227d87a67b919db0d7f4cfb69ba8",
+      "status": "held-for-review",
+      "reasonCategory": "privacy-review",
+      "reviewedAt": "2026-11-10T12:10:26.726755+00:00",
+      "automaticRetry": false
+    },
+    {
+      "sourceUrlSha256": "ff613fbc60ffc8cd43189cf40191b5edb4da32c31baccc2058d53a6e30f8fd2e",
+      "status": "held-for-review",
+      "reasonCategory": "incomplete-source",
+      "reviewedAt": "2026-11-10T12:10:26.726755+00:00",
+      "automaticRetry": false
+    }
+  ]
+}
