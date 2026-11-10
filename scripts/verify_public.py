@@ -4,11 +4,13 @@ Run after GitHub Pages has built the intended commit. A stale deployment fails
 rather than being reported as published. Optional reports stay in artifacts/.
 """
 from datetime import datetime, timezone
+from concurrent.futures import ThreadPoolExecutor
 from html.parser import HTMLParser
 from pathlib import Path
 from urllib.request import Request, urlopen
 import argparse
 import hashlib
+import html
 import json
 import time
 import xml.etree.ElementTree as ET
@@ -70,9 +72,9 @@ def verify(get=fetch):
     for asset in ['assets/style.css', 'assets/app.js']:
         if get(BASE + asset) != (ROOT / asset).read_bytes():
             raise ValueError('Published asset is stale: ' + asset)
-    image_count = 0
     ds = records()
-    for record in ds:
+    def check_record(record):
+        image_count = 0
         raw = get(BASE + case_path(record)).decode('utf-8')
         parsed = JudgmentText()
         parsed.feed(raw)
@@ -81,13 +83,25 @@ def verify(get=fetch):
         for digest in [record['fullTextSha256'], source_digest(record)]:
             if digest not in raw:
                 raise ValueError('Missing published provenance: ' + record['id'])
+        if record.get('subsequentHistory'):
+            if html.escape(record['subsequentHistory']['notice'], quote=True) not in raw:
+                raise ValueError('Missing subsequent-history notice: ' + record['id'])
+        if record.get('neutralCitation'):
+            if '<dt>중립인용</dt><dd>' + record['neutralCitation'] + '</dd>' not in raw:
+                raise ValueError('Missing neutral-citation metadata: ' + record['id'])
         for image in record.get('sourceImages', []):
             if image['assetPath'] not in raw:
                 raise ValueError('Missing source image: ' + record['id'])
             if hashlib.sha256(get(BASE + image['assetPath'])).hexdigest() != image['sha256']:
                 raise ValueError('Modified published source image: ' + record['id'])
             image_count += 1
-        print(record['id'], 'verified', flush=True)
+        return record['id'], image_count
+    # This bounded parallelism checks only our own deployment, never source courts.
+    image_count = 0
+    with ThreadPoolExecutor(max_workers=3) as pool:
+        for identifier, images in pool.map(check_record, ds):
+            image_count += images
+            print(identifier, 'verified', flush=True)
     for jurisdiction, count in expected['jurisdictions'].items():
         raw = get(BASE + jurisdiction.lower() + '/').decode('utf-8')
         if raw.count('data-case ') != count:

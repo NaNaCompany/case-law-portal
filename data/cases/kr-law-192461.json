@@ -1,0 +1,97 @@
+{
+  "schemaVersion": 1,
+  "id": "kr-law-192461",
+  "jurisdiction": "KR",
+  "court": "대법원",
+  "caseNumber": "2000다26333",
+  "decisionDate": "2000-09-05",
+  "title": "보증채무금",
+  "sourceUrl": "https://www.law.go.kr/LSW/precInfoP.do?precSeq=192461",
+  "sourceName": "법제처 국가법령정보센터",
+  "retrievedAt": "2026-11-10T11:51:40.749266+00:00",
+  "sourceHtmlSha256": "de6316b58759f1c72bf196103f0928b8f466cf1a0e0cee366cdee4c689959328",
+  "fullTextSha256": "a2c80f393d143227070dfca0a50395256f73ea0e625810ccc189226dc0da7c0a",
+  "sections": [
+    {
+      "heading": "원고, 상고인",
+      "text": "현대강관 주식회사 (소송대리인 법무법인 삼한 담당변호사 김광년)"
+    },
+    {
+      "heading": "피고, 피상고인",
+      "text": "대한주택보증 주식회사 (소송대리인 변호사 박기웅 외 4인)"
+    },
+    {
+      "heading": "원심판결",
+      "text": "서울고법 2000. 5. 3. 선고 2000나2728 판결"
+    },
+    {
+      "heading": "주 문",
+      "text": "상고를 기각한다. 상고비용은 원고의 부담으로 한다."
+    },
+    {
+      "heading": "이 유",
+      "text": "매수인이 매도인으로부터 물품을 공급받은 다음 그들 사이의 물품대금 지급방법에 관한 약정에 따라 그 대금의 지급을 위하여 물품 매도인에게 지급기일이 물품 공급일자 이후로 된 약속어음을 발행·교부한 경우 물품대금 지급채무의 이행기는 그 약속어음의 지급기일이고(대법원 1999. 8. 24. 선고 99다24508 판결 참조), 위 약속어음이 발행인의 지급정지의 사유로 그 지급기일 이전에 지급거절되었더라도 물품대금 지급채무가 그 지급거절된 때에 이행기에 도달하는 것은 아니다.\n같은 취지의 원심 판단은 옳고, 거기에 상고이유의 주장과 같은 법리오해의 잘못이나 법률행위와 약관의 해석을 그르친 등의 잘못이 없다. 따라서 상고이유는 모두 받아들이지 아니한다.\n그러므로 상고를 기각하고, 상고비용은 패소자의 부담으로 하여 주문과 같이 판결한다."
+    },
+    {
+      "heading": "재판부",
+      "text": "대법관 배기원(재판장) 서성(주심) 유지담 박재윤",
+      "headingAddedForNavigation": true
+    }
+  ],
+  "fullText": "【원고, 상고인】\n현대강관 주식회사 (소송대리인 법무법인 삼한 담당변호사 김광년)\n\n【피고, 피상고인】\n대한주택보증 주식회사 (소송대리인 변호사 박기웅 외 4인)\n\n【원심판결】\n서울고법 2000. 5. 3. 선고 2000나2728 판결\n\n【주 문】\n상고를 기각한다. 상고비용은 원고의 부담으로 한다.\n\n【이 유】\n매수인이 매도인으로부터 물품을 공급받은 다음 그들 사이의 물품대금 지급방법에 관한 약정에 따라 그 대금의 지급을 위하여 물품 매도인에게 지급기일이 물품 공급일자 이후로 된 약속어음을 발행·교부한 경우 물품대금 지급채무의 이행기는 그 약속어음의 지급기일이고(대법원 1999. 8. 24. 선고 99다24508 판결 참조), 위 약속어음이 발행인의 지급정지의 사유로 그 지급기일 이전에 지급거절되었더라도 물품대금 지급채무가 그 지급거절된 때에 이행기에 도달하는 것은 아니다.\n같은 취지의 원심 판단은 옳고, 거기에 상고이유의 주장과 같은 법리오해의 잘못이나 법률행위와 약관의 해석을 그르친 등의 잘못이 없다. 따라서 상고이유는 모두 받아들이지 아니한다.\n그러므로 상고를 기각하고, 상고비용은 패소자의 부담으로 하여 주문과 같이 판결한다.\n\n【재판부】\n대법관 배기원(재판장) 서성(주심) 유지담 박재윤",
+  "rights": {
+    "basis": "대한민국 저작권법 제7조 제3호: 법원의 판결·결정·명령은 보호받지 못하는 저작물. 공식 공개 전문만 수록.",
+    "statuteUrl": "https://www.law.go.kr/lsLinkCommonInfo.do?chrClsCd=010202&lsJoLnkSeq=1029423769",
+    "reuseNoticeUrl": "https://open.law.go.kr/LSO/usrJoin.do",
+    "attribution": "출처: 법제처 국가법령정보센터",
+    "scope": "공식 전문; 민간 편집 주석·유료 데이터베이스 내용 제외"
+  },
+  "privacyReview": {
+    "reviewedAt": "2026-11-10T11:51:51.566851+00:00",
+    "status": "reviewed-source-anonymization-preserved",
+    "findings": [
+      "원고/피고/소외 등 원문의 비실명 표기를 그대로 유지.",
+      "공개된 변호사·재판부 이름과 법인명은 원문 그대로 유지.",
+      "주민등록번호 형식, 휴대전화번호 형식, 이메일의 정규식 점검에서 발견 없음."
+    ],
+    "limitations": [
+      "공식 비실명 공개본의 재현이며 완전한 재식별 불가능성을 보증하지 않음.",
+      "자동 패턴 점검은 개인정보 전반에 대한 법률 심사를 대체하지 않음."
+    ]
+  },
+  "limitations": [
+    "국가법령정보센터의 공개 전문 텍스트이며 법원 인증등본이 아님.",
+    "HTML 태그를 제거하고 줄바꿈·앞뒤 공백만 정규화. 문구의 요약·의역·추가 없음.",
+    "재판부 표제만 탐색용으로 추가. 판시사항·판결요지·참조조문 등 전문 외 편집 섹션은 제외.",
+    "이 한정된 묶음의 개별 열람은 대량 수집 허가를 의미하지 않음."
+  ],
+  "review": {
+    "verified": true,
+    "metadataVerified": true,
+    "sourceHashVerified": true,
+    "fullTextVerified": true,
+    "anonymizationPreserved": true,
+    "rightsBasisReviewed": true,
+    "reviewedAt": "2026-11-10T11:51:51.567292+00:00",
+    "titleSelector": "#contentBody > h2",
+    "sourceMetadataText": "[대법원 2000. 9. 5. 선고 2000다26333 판결]",
+    "domCompleteness": {
+      "verified": true,
+      "allTextPreservedIgnoringWhitespace": true,
+      "nonTextElementCounts": {
+        "table": 0,
+        "img": 0,
+        "svg": 0,
+        "canvas": 0,
+        "iframe": 0,
+        "object": 0,
+        "embed": 0
+      },
+      "omittedTextSectionsWithinJeonmun": [],
+      "scope": "공식 HTML의 전문 구간. 별도 첨부문서의 존재·내용은 확인하지 않았으며 전문 외 판시사항·판결요지 등은 수록 대상에서 제외."
+    },
+    "fullTextManuallyRead": true,
+    "nonpublicationInstructionReview": "전문과 원본 HTML의 공개제한 관련 문구를 점검함. 해당 판결에 적용되는 재게시 금지 지시 발견 없음.",
+    "sensitiveSubjectMatterScreen": "민사·상사 분쟁 본문 검토. 비실명 표기 보존. 미성년자·성적 사건·가사 사건·개인 의료정보 사건으로 판단되는 내용 없음."
+  }
+}
