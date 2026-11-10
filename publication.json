@@ -1,13 +1,32 @@
 {
   "schemaVersion": 1,
   "updated": "2026-11-10",
-  "caseCount": 3,
+  "caseCount": 17,
   "jurisdictions": {
-    "KR": 3
+    "KR": 16,
+    "IN": 1
   },
   "scope": "Selected reviewed judgments; not exhaustive",
   "oneCasePerPage": true,
   "cases": [
+    {
+      "id": "kr-law-609395",
+      "url": "https://nanalab.kr/case-law-portal/kr/cases/kr-law-609395/",
+      "sourceUrl": "https://www.law.go.kr/LSW/precInfoP.do?precSeq=609395",
+      "fullTextSha256": "0542613c453f24641e41ae55bfe8bc5e9f744770db7345aaaaa137edc59eb92e"
+    },
+    {
+      "id": "kr-law-600373",
+      "url": "https://nanalab.kr/case-law-portal/kr/cases/kr-law-600373/",
+      "sourceUrl": "https://www.law.go.kr/LSW/precInfoP.do?precSeq=600373",
+      "fullTextSha256": "d442365bb1ff6cb093831c0ccfec8d2cade61195a9f7207ba0cd9860a0d90938"
+    },
+    {
+      "id": "kr-law-241037",
+      "url": "https://nanalab.kr/case-law-portal/kr/cases/kr-law-241037/",
+      "sourceUrl": "https://www.law.go.kr/LSW/precInfoP.do?precSeq=241037",
+      "fullTextSha256": "2953667643009c5c989ac518b2d2b8c1410a3dd77404aa733cc4820257f10a1f"
+    },
     {
       "id": "kr-law-241101",
       "url": "https://nanalab.kr/case-law-portal/kr/cases/kr-law-241101/",
@@ -21,10 +40,76 @@
       "fullTextSha256": "57ebce62c50678d650a11c7d1dc70a77454d327926edec8afd651e1eeb1024a4"
     },
     {
+      "id": "kr-law-237883",
+      "url": "https://nanalab.kr/case-law-portal/kr/cases/kr-law-237883/",
+      "sourceUrl": "https://www.law.go.kr/LSW/precInfoP.do?precSeq=237883",
+      "fullTextSha256": "e12c1e810e36e495d03c15684576eb1e01fbbe0e04df2e5db89aaea009b8d880"
+    },
+    {
+      "id": "kr-law-233865",
+      "url": "https://nanalab.kr/case-law-portal/kr/cases/kr-law-233865/",
+      "sourceUrl": "https://www.law.go.kr/LSW/precInfoP.do?precSeq=233865",
+      "fullTextSha256": "3606e1d5e7eada69fa1587bef842289b91c41675c97fef4ffb53a62658345d14"
+    },
+    {
+      "id": "kr-law-239607",
+      "url": "https://nanalab.kr/case-law-portal/kr/cases/kr-law-239607/",
+      "sourceUrl": "https://www.law.go.kr/LSW/precInfoP.do?precSeq=239607",
+      "fullTextSha256": "ee194e1b353f17db96f31468c67208108006a6d59549588028dcf181c97ae122"
+    },
+    {
+      "id": "kr-law-239599",
+      "url": "https://nanalab.kr/case-law-portal/kr/cases/kr-law-239599/",
+      "sourceUrl": "https://www.law.go.kr/LSW/precInfoP.do?precSeq=239599",
+      "fullTextSha256": "22dcbdad6b8ed2ae1223c7368061d0a904232453f72553e69a24d27e394b4cc6"
+    },
+    {
+      "id": "kr-law-237057",
+      "url": "https://nanalab.kr/case-law-portal/kr/cases/kr-law-237057/",
+      "sourceUrl": "https://www.law.go.kr/LSW/precInfoP.do?precSeq=237057",
+      "fullTextSha256": "58296558995fbabb0de25f248af4a907cf5e431b180516f4715dcf00094d3b27"
+    },
+    {
+      "id": "kr-law-220297",
+      "url": "https://nanalab.kr/case-law-portal/kr/cases/kr-law-220297/",
+      "sourceUrl": "https://www.law.go.kr/LSW/precInfoP.do?precSeq=220297",
+      "fullTextSha256": "e66601b3ad5135579eb2fc7212c5aaa7d7ce09b63eb765ab26486fbc94dfe127"
+    },
+    {
+      "id": "kr-law-218187",
+      "url": "https://nanalab.kr/case-law-portal/kr/cases/kr-law-218187/",
+      "sourceUrl": "https://www.law.go.kr/LSW/precInfoP.do?precSeq=218187",
+      "fullTextSha256": "dc87198930616c54732e11721a4ab4673d27357cdb28124713beb0f5225163ae"
+    },
+    {
       "id": "kr-law-220013",
       "url": "https://nanalab.kr/case-law-portal/kr/cases/kr-law-220013/",
       "sourceUrl": "https://www.law.go.kr/LSW/precInfoP.do?precSeq=220013",
       "fullTextSha256": "ae07a99f3c802b1d66b822e0789a9e1ccbb1e15cdbd9a4da49a0d82435e2e603"
+    },
+    {
+      "id": "kr-law-206343",
+      "url": "https://nanalab.kr/case-law-portal/kr/cases/kr-law-206343/",
+      "sourceUrl": "https://www.law.go.kr/LSW/precInfoP.do?precSeq=206343",
+      "fullTextSha256": "732ea07fbaaa5b4f553c11f5a09d9660896e084792db26be805a907366d43325"
+    },
+    {
+      "id": "kr-law-177822",
+      "url": "https://nanalab.kr/case-law-portal/kr/cases/kr-law-177822/",
+      "sourceUrl": "https://www.law.go.kr/LSW/precInfoP.do?precSeq=177822",
+      "fullTextSha256": "2c37fd08b7575bd8c563118c07dc9678bdc2ea374614358f3b63c6d9d4fb5efd"
+    },
+    {
+      "id": "kr-law-135834",
+      "url": "https://nanalab.kr/case-law-portal/kr/cases/kr-law-135834/",
+      "sourceUrl": "https://www.law.go.kr/LSW/precInfoP.do?precSeq=135834",
+      "fullTextSha256": "8f70cbba448a835c7662d9a34f0f981e6c811f336711645b055c48a56f2661f2"
+    },
+    {
+      "id": "in-sci-2007-6472",
+      "url": "https://nanalab.kr/case-law-portal/in/cases/in-sci-2007-6472/",
+      "sourceUrl": "https://api.sci.gov.in/judgment/judis/30019.pdf",
+      "fullTextSha256": "dfc614aa044f959d7bb921db09494f349ef0d007e9b21bca95e80864a662508b"
     }
   ]
 }

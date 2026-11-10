@@ -4,20 +4,20 @@ The adjacent original HTML must match sourceHtmlFile and sourceHtmlSha256.
 """
 from pathlib import Path
 import hashlib,json,sys
-from build import ROOT,validate_record,records,build
+from build import ROOT,validate_record,records,build,source_digest
 
 def main():
     p=Path(sys.argv[1]).resolve();d=json.loads(p.read_text());validate_record(d)
-    source=(p.parent/d['sourceHtmlFile']).resolve()
+    source=(p.parent/d['sourcePdfFile' if d.get('sourceType')=='pdf' else 'sourceHtmlFile']).resolve()
     assert source.parent==p.parent,'Original source must be adjacent to record'
-    assert hashlib.sha256(source.read_bytes()).hexdigest()==d['sourceHtmlSha256'],'Original HTML hash mismatch'
+    assert hashlib.sha256(source.read_bytes()).hexdigest()==source_digest(d),'Original HTML hash mismatch'
     existing=records();key=lambda x:(x['jurisdiction'],x['court'],x['caseNumber'],x['decisionDate'])
     for old in existing:
         if old['id']==d['id']:
             assert old['fullTextSha256']==d['fullTextSha256'] and key(old)==key(d) and old['sourceUrl']==d['sourceUrl'],'Conflict: review a corrected-source version separately'
             print(json.dumps({'status':'already-imported','id':d['id']}));return
         assert old['sourceUrl']!=d['sourceUrl'] and old['fullTextSha256']!=d['fullTextSha256'] and key(old)!=key(d),'Duplicate judgment'
-    d.pop('sourceHtmlFile',None)
+    d.pop('sourceHtmlFile',None);d.pop('sourcePdfFile',None)
     dest=ROOT/'data/cases'/f"{d['id']}.json"
     dest.write_text(json.dumps(d,ensure_ascii=False,indent=2)+'\n')
     try:

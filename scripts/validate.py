@@ -30,12 +30,12 @@ for name,text in out.items():
             if target.is_dir():target=target/'index.html'
             assert target.is_file(),f'{name}: missing {link}'
         elif parsed.fragment:assert parsed.fragment in p.ids,f'{name}: missing anchor {link}'
-    assert p.caseBodies==(1 if name.startswith('kr/cases/') else 0)
+    assert p.caseBodies==(1 if '/cases/' in name else 0)
 ns={'s':'http://www.sitemaps.org/schemas/sitemap/0.9'}
 locs=[e.text for e in ET.fromstring(out['sitemap.xml']).findall('s:url/s:loc',ns)]
 assert len(locs)==len(set(locs))==len(htmls)
 assert set(locs)=={BASE+p.removesuffix('index.html') for p in htmls}
 assert sum(p.caseBodies for p in htmls.values())==len(ds)
-assert len(list((ROOT/'kr/cases').glob('*/index.html')))==len(ds),'Orphan case page'
+assert len(list(ROOT.glob('*/cases/*/index.html')))==len(ds),'Orphan case page'
 manifest=json.loads(out['publication.json']);assert manifest['caseCount']==len(ds)
 print(json.dumps({'status':'passed','cases':len(ds),'htmlPages':len(htmls),'sitemapUrls':len(locs),'checks':['deterministic build','metadata and rights review','text and section integrity','deduplication','local links and anchors','canonical URLs','publisher tags','one case per page','sitemap exact coverage']}))

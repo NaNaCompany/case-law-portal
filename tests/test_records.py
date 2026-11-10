@@ -20,6 +20,8 @@ class Integrity(unittest.TestCase):
    with self.assertRaises(AssertionError):validate_record(bad)
  def test_reject_nontext_omission(self):
   for d in records():
-   bad=copy.deepcopy(d);bad['review']['domCompleteness']['nonTextElementCounts']['table']=1
+   bad=copy.deepcopy(d)
+   if d.get('sourceType')=='pdf':bad['review']['pdfCompleteness']['rasterImages']=1
+   else:bad['review']['domCompleteness']['nonTextElementCounts']['table']=1
    with self.assertRaises(AssertionError):validate_record(bad)
 if __name__=='__main__':unittest.main()
