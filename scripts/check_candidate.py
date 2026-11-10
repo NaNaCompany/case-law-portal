@@ -9,8 +9,8 @@ from build import ROOT
 def canonical_source_url(url):
     parsed=urlsplit(url)
     ids=parse_qs(parsed.query).get('precSeq', [])
-    if parsed.hostname in ('law.go.kr','www.law.go.kr') and parsed.path in ('/LSW/precInfoP.do','/precInfoP.do') and len(ids)==1 and ids[0].isdigit():
-        return 'https://www.law.go.kr/LSW/precInfoP.do?precSeq='+ids[0]
+    if parsed.hostname in ('law.go.kr','www.law.go.kr') and parsed.path in ('/LSW/precInfoP.do','/precInfoP.do') and len(ids)==1 and ids[0].isascii() and ids[0].isdigit():
+        return 'https://www.law.go.kr/LSW/precInfoP.do?precSeq='+str(int(ids[0]))
     return url
 
 

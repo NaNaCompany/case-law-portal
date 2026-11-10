@@ -34,6 +34,12 @@ class CandidateLedger(unittest.TestCase):
         with self.assertRaisesRegex(ValueError,'quarantined'):
             assert_unheld_source('https://law.go.kr/precInfoP.do?precSeq=123456789',ledger)
 
+    def test_padded_numeric_source_id_cannot_skip_hold(self):
+        canonical='https://www.law.go.kr/LSW/precInfoP.do?precSeq=123456789'
+        ledger={'entries':[{'sourceUrlSha256':hashlib.sha256(canonical.encode()).hexdigest()}]}
+        with self.assertRaisesRegex(ValueError,'quarantined'):
+            assert_unheld_source('https://law.go.kr/precInfoP.do?precSeq=00123456789',ledger)
+
     def test_ledger_has_no_unpublished_urls_or_personal_content(self):
         data = json.loads((ROOT / 'data/review-ledger.json').read_text())
         hashes = set()
