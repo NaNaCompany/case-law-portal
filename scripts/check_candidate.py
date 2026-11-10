@@ -2,12 +2,22 @@
 import argparse
 import hashlib
 import json
+from urllib.parse import urlsplit, parse_qs
 from build import ROOT
 
 
+def canonical_source_url(url):
+    parsed=urlsplit(url)
+    ids=parse_qs(parsed.query).get('precSeq', [])
+    if parsed.hostname in ('law.go.kr','www.law.go.kr') and parsed.path in ('/LSW/precInfoP.do','/precInfoP.do') and len(ids)==1 and ids[0].isdigit():
+        return 'https://www.law.go.kr/LSW/precInfoP.do?precSeq='+ids[0]
+    return url
+
+
 def lookup(url, publication, ledger):
+    url=canonical_source_url(url)
     for case in publication['cases']:
-        if case['sourceUrl'] == url:
+        if canonical_source_url(case['sourceUrl']) == url:
             return {'status': 'already-published', 'id': case['id'], 'page': case['url']}
     digest = hashlib.sha256(url.encode()).hexdigest()
     for entry in ledger['entries']:

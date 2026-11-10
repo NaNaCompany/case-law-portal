@@ -11,6 +11,7 @@ import subprocess
 import sys
 
 from build import ROOT, records, source_digest, validate_record
+from privacy_gate import validate_contextual_privacy
 
 
 def adjacent(base, filename):
@@ -61,6 +62,7 @@ def preflight(manifest):
                 raise ValueError('Conflicting correction needs separate review: ' + identifier)
             status = 'already-imported'
         else:
+            validate_contextual_privacy(record)
             if any(record['sourceUrl'] == other['sourceUrl'] or
                    record['fullTextSha256'] == other['fullTextSha256'] or
                    case_key(record) == case_key(other) for other in existing):

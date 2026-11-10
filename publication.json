@@ -2,6 +2,7 @@
   "schemaVersion": 1,
   "updated": "2026-11-10",
   "caseCount": 75,
+  "privacyEditedCaseCount": 1,
   "jurisdictions": {
     "KR": 65,
     "IN": 10
@@ -295,7 +296,9 @@
       "id": "kr-law-209603",
       "url": "https://nanalab.kr/case-law-portal/kr/cases/kr-law-209603/",
       "sourceUrl": "https://www.law.go.kr/LSW/precInfoP.do?precSeq=209603",
-      "fullTextSha256": "89c75d053fe4971509922bd9b9cc92f77ec7f581f3594c3203d0e2c80460be27"
+      "fullTextSha256": "bd42f19f661190f28290fd52a9aff4d35d5eeb620d1d9f8200b191204d7a6fa8",
+      "publicationMode": "privacy-edited",
+      "originalFullTextSha256": "89c75d053fe4971509922bd9b9cc92f77ec7f581f3594c3203d0e2c80460be27"
     },
     {
       "id": "kr-law-208398",

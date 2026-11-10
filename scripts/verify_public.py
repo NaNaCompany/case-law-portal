@@ -51,6 +51,21 @@ def locations(raw):
     return [e.text for e in ET.fromstring(raw).findall('s:url/s:loc', ns)]
 
 
+class SearchText(HTMLParser):
+    def __init__(self):
+        super().__init__()
+        self.terms=[]
+
+    def handle_starttag(self,tag,attrs):
+        values=dict(attrs)
+        if tag=='li' and 'data-case' in values:
+            self.terms.append(values.get('data-search'))
+
+
+def search_text(record):
+    return ' '.join(record[key] for key in ('court','caseNumber','title','decisionDate','fullText'))
+
+
 def fetch(url):
     # Only the user's own public deployment is fetched by this verifier.
     if not url.startswith('https://nanalab.kr/'):
@@ -89,6 +104,11 @@ def verify(get=fetch, workers=1):
         if record.get('neutralCitation'):
             if '<dt>중립인용</dt><dd>' + record['neutralCitation'] + '</dd>' not in raw:
                 raise ValueError('Missing neutral-citation metadata: ' + record['id'])
+        if record.get('privacyEdits'):
+            if 'privacy-edit-notice' not in raw or record['privacyEdits']['originalFullTextSha256'] not in raw:
+                raise ValueError('Missing privacy-edit provenance: ' + record['id'])
+            if 'class="status-pill">공식 공개 전문' in raw:
+                raise ValueError('Privacy-edited page is incorrectly labelled verbatim: ' + record['id'])
         for image in record.get('sourceImages', []):
             if image['assetPath'] not in raw:
                 raise ValueError('Missing source image: ' + record['id'])
@@ -102,10 +122,16 @@ def verify(get=fetch, workers=1):
         for identifier, images in pool.map(check_record, ds):
             image_count += images
             print(identifier, 'verified', flush=True)
+    home=SearchText();home.feed(get(BASE).decode('utf-8'))
+    if home.terms != [search_text(record) for record in ds]:
+        raise ValueError('Published home search data differs from reviewed public text')
     for jurisdiction, count in expected['jurisdictions'].items():
         raw = get(BASE + jurisdiction.lower() + '/').decode('utf-8')
         if raw.count('data-case ') != count:
             raise ValueError('Published country count differs: ' + jurisdiction)
+        listing=SearchText();listing.feed(raw)
+        if listing.terms != [search_text(record) for record in ds if record['jurisdiction']==jurisdiction]:
+            raise ValueError('Published country search data differs: ' + jurisdiction)
     local_urls = locations((ROOT / 'sitemap.xml').read_bytes())
     public_urls = locations(get(BASE + 'sitemap.xml'))
     if len(public_urls) != len(set(public_urls)) or set(public_urls) != set(local_urls):

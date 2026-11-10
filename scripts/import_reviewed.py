@@ -5,6 +5,7 @@ The adjacent original HTML must match sourceHtmlFile and sourceHtmlSha256.
 from pathlib import Path
 import hashlib,json,sys
 from build import ROOT,validate_record,records,build,source_digest,image_asset
+from privacy_gate import validate_contextual_privacy
 
 def main():
     p=Path(sys.argv[1]).resolve();d=json.loads(p.read_text());validate_record(d)
@@ -22,6 +23,7 @@ def main():
             assert old['fullTextSha256']==d['fullTextSha256'] and key(old)==key(d) and old['sourceUrl']==d['sourceUrl'],'Conflict: review a corrected-source version separately'
             print(json.dumps({'status':'already-imported','id':d['id']}));return
         assert old['sourceUrl']!=d['sourceUrl'] and old['fullTextSha256']!=d['fullTextSha256'] and key(old)!=key(d),'Duplicate judgment'
+    validate_contextual_privacy(d)
     created_assets=[]
     for im,b in image_bytes:
         asset=ROOT/image_asset(d,im);assert not asset.exists(),'Unexpected pre-existing image asset'

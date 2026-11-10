@@ -38,6 +38,13 @@
       "automaticRetry": false
     },
     {
+      "sourceUrlSha256": "6e240f140aa4bb152bf219565662d1d624a4062533162f9469a68dcf8fbc70ad",
+      "status": "held-for-review",
+      "reasonCategory": "privacy-review",
+      "reviewedAt": "2026-11-10T13:22:38.167179+00:00",
+      "automaticRetry": false
+    },
+    {
       "sourceUrlSha256": "77240b8a43a5307dae2820336e391d45f444e0c9d9d1e27b050cfa24830eb27d",
       "status": "held-for-review",
       "reasonCategory": "privacy-review",

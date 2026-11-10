@@ -55,6 +55,22 @@ class PublicRelease(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, 'asset is stale'):
             self.run_verify(stale)
 
+    def test_reject_stale_search_body(self):
+        def stale(url):
+            raw=self.local_fetch(url)
+            return raw.replace(b'data-search="',b'data-search="unreviewed ',1) if url==BASE else raw
+        with self.assertRaisesRegex(ValueError,'home search data'):
+            self.run_verify(stale)
+
+    def test_reject_missing_privacy_edit_notice(self):
+        edited=next(record for record in records() if record.get('privacyEdits'))
+        target=BASE+case_path(edited)
+        def missing(url):
+            raw=self.local_fetch(url)
+            return raw.replace(b'privacy-edit-notice',b'notice-missing') if url==target else raw
+        with self.assertRaisesRegex(ValueError,'privacy-edit provenance'):
+            self.run_verify(missing)
+
     def test_text_parser_preserves_entities_and_whitespace(self):
         p = JudgmentText()
         p.feed('<p>Outside</p><div class="text pdf-text">A &amp; B\n  &lt;C&gt;\n</div><div>Ignore</div>')
