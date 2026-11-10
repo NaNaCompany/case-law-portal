@@ -1,0 +1,89 @@
+"""Deterministic static publisher. Only pre-reviewed records reach public pages."""
+from pathlib import Path
+from datetime import datetime
+import json, hashlib, html, re, sys
+ROOT=Path(__file__).resolve().parents[1]
+BASE='https://nanalab.kr/case-law-portal/'
+E=lambda value:html.escape(str(value),quote=True)
+TODAY='2026-11-10'
+
+def sha(text): return hashlib.sha256(text.encode()).hexdigest()
+def validate_record(d):
+    required=['id','jurisdiction','court','caseNumber','decisionDate','title','sourceUrl','sourceName','retrievedAt','sourceHtmlSha256','fullTextSha256','sections','fullText','rights','privacyReview','limitations','review']
+    assert all(k in d for k in required),'Missing mandatory metadata'
+    assert re.fullmatch(r'[a-z]{2}-[a-z0-9-]+',d['id']),'Unsafe ID'
+    assert d['jurisdiction']=='KR','New jurisdictions require an implemented and reviewed source policy'
+    assert d['title'] not in ('판례정보','',None),'Missing case title'
+    datetime.fromisoformat(d['decisionDate']);datetime.fromisoformat(d['retrievedAt'])
+    assert d['sourceUrl'].startswith('https://www.law.go.kr/LSW/precInfoP.do?precSeq='),'Unreviewed source'
+    assert re.fullmatch('[0-9a-f]{64}',d['sourceHtmlSha256'])
+    assert sha(d['fullText'])==d['fullTextSha256'],'Text integrity mismatch'
+    assert all(d['review'].get(k) is True for k in ['verified','metadataVerified','sourceHashVerified','fullTextVerified','anonymizationPreserved','rightsBasisReviewed']),'Required source review missing'
+    assert d['review'].get('domCompleteness',{}).get('allTextPreservedIgnoringWhitespace') is True,'Incomplete extraction'
+    assert not any(d['review']['domCompleteness'].get('nonTextElementCounts',{}).values()),'Non-text structure needs a capable renderer before publication'
+    assert '\n\n'.join('【'+s['heading']+'】\n'+s['text'] for s in d['sections'])==d['fullText'],'Section/body integrity mismatch'
+    assert d['privacyReview']['status']=='reviewed-source-anonymization-preserved','Privacy review missing'
+    assert len(d['fullText'])>=150 and d['sections'],'No judgment body'
+    assert any(re.sub(r'\s','',s['heading'])=='주문' for s in d['sections']),'Missing order'
+    assert any(re.sub(r'\s','',s['heading'])=='이유' for s in d['sections']),'Missing reasoning'
+    assert all(isinstance(s.get('text'),str) and s['text'].strip() for s in d['sections'])
+    assert d['rights'].get('basis') and d['rights'].get('reuseNoticeUrl'),'Rights evidence missing'
+    # Reject obvious identifiers pending an additional privacy review.
+    assert not re.search(r'\b\d{6}[- ]?[1-4]\d{6}\b|\b01[016789][- ]?\d{3,4}[- ]?\d{4}\b',d['fullText']),'Possible sensitive identifier'
+    return d
+
+def records():
+    ds=[validate_record(json.loads(p.read_text())) for p in sorted((ROOT/'data/cases').glob('*.json'))]
+    for key in [lambda d:d['id'],lambda d:d['sourceUrl'],lambda d:d['fullTextSha256'],lambda d:(d['jurisdiction'],d['court'],d['caseNumber'],d['decisionDate'])]:
+        values=[key(d) for d in ds];assert len(values)==len(set(values)),'Duplicate judgment'
+    return sorted(ds,key=lambda d:(d['decisionDate'],d['id']),reverse=True)
+
+TRACK_HEAD='''<script defer src="https://nanalab.kr/src_cdn/banner/astra.js"></script>
+<script data-nana-publisher="adsense" async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-9767176956440077" crossorigin="anonymous"></script>
+<script data-nana-publisher="gtm">(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);})(window,document,'script','dataLayer','GTM-NV2WWQXB');</script>
+<script data-nana-publisher="ga4-loader" async src="https://www.googletagmanager.com/gtag/js?id=G-2ZYSF0173P"></script><script data-nana-publisher="ga4-config">window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments)}gtag('js',new Date());gtag('config','G-2ZYSF0173P');</script>'''
+TRACK_TAIL='''<script data-nana-publisher="cloudflare-fallback">(function(){function ensureBeacon(){if(document.querySelector('script[src*="static.cloudflareinsights.com/beacon.min.js"]'))return;var b=document.createElement('script');b.defer=true;b.src='https://static.cloudflareinsights.com/beacon.min.js';b.setAttribute('data-cf-beacon',JSON.stringify({token:'9f3423bb0d034d91bbe1a12afeff2429'}));document.head.appendChild(b)}if(document.readyState==='complete')setTimeout(ensureBeacon,0);else window.addEventListener('load',function(){setTimeout(ensureBeacon,0)},{once:true})})();</script>'''
+
+def page(path,title,description,body,active='',structured=None):
+    depth=len(Path(path).parts)-1; rel='../'*depth or './'
+    canonical=BASE+('' if path=='index.html' else path.removesuffix('index.html'))
+    links=''.join(f'<a href="{rel}{dest}"'+(' aria-current="page"' if active==label else '')+f'>{label}</a>' for dest,label in [('kr/','대한민국'),('sources/','출처·수집 기준')])
+    ld=json.dumps(structured or {'@context':'https://schema.org','@type':'CollectionPage','name':title,'url':canonical,'inLanguage':'ko'},ensure_ascii=False).replace('<','\\u003c')
+    return f'''<!doctype html><html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>{E(title)} | NaNa 판례 자료실</title><meta name="description" content="{E(description)}"><link rel="canonical" href="{canonical}"><meta property="og:title" content="{E(title)} | NaNa 판례 자료실"><meta property="og:description" content="{E(description)}"><meta property="og:type" content="website"><meta property="og:url" content="{canonical}"><meta name="theme-color" content="#142d34"><link rel="stylesheet" href="{rel}assets/style.css"><script defer src="{rel}assets/app.js"></script><script type="application/ld+json">{ld}</script>{TRACK_HEAD}</head><body><noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-NV2WWQXB" height="0" width="0" style="display:none;visibility:hidden" title="Google Tag Manager"></iframe></noscript><a class="skip" href="#main">본문 바로가기</a><header class="topbar"><div class="wrap"><a class="brand" href="{rel}"><span class="brand-mark" aria-hidden="true">§</span><span>NaNa 판례 자료실<small>CASE LAW LIBRARY</small></span></a><nav class="nav" aria-label="주요 메뉴">{links}<a class="external" href="https://nanalab.kr/apps/">More Apps ↗</a></nav></div></header><main class="wrap" id="main">{body}</main><footer class="footer"><div class="wrap"><p><strong>NaNa Case Law Library</strong><br>독립 판례 자료실 · 법원 공식 서비스가 아닙니다.<br>수록 범위와 최신성을 보장하지 않으며, 법적 판단 전 공식 원문을 확인하세요.</p><nav aria-label="하단 메뉴"><a href="{rel}sources/">출처·수집 기준</a><a href="{rel}sitemap.xml">사이트맵</a><a href="https://nanalab.kr/world-law-portal/">법령 자료실 ↗</a></nav></div></footer>{TRACK_TAIL}</body></html>'''
+
+def cards(ds,rel):
+    if not ds:return '<div class="empty"><h3>판례를 한 건씩 준비하고 있습니다.</h3><p>공식 원문과 이용 조건, 비실명 처리를 확인한 판례부터 개별 페이지로 공개합니다. 아직 수록된 판례는 없습니다.</p></div>'
+    return '<ol class="case-list">'+''.join(f'''<li class="case-row" data-case data-search="{E(d['court']+' '+d['caseNumber']+' '+d['title']+' '+d['decisionDate']+' '+d['fullText'])}"><div class="date"><span class="court">대한민국 · {E(d['court'])}</span><time datetime="{d['decisionDate']}">{d['decisionDate'].replace('-','. ')}</time></div><div><h3><a href="{rel}kr/cases/{d['id']}/">{E(d['title'])}</a><span class="badge">공식 공개 전문</span></h3><p>{E(d['caseNumber'])} · 출처: {E(d['sourceName'])}</p></div><a class="arrow" href="{rel}kr/cases/{d['id']}/" aria-label="{E(d['caseNumber'])} 판결문 읽기">↗</a></li>''' for d in ds)+'</ol>'
+
+def search():return '''<form class="search-panel" data-search role="search"><label for="case-query">사건번호, 사건명 또는 판결문 문구</label><div class="search-row"><input type="search" id="case-query" name="q" placeholder="예: 2018다276027 · 재판상 자백" autocomplete="off"><button type="submit">검색</button></div><p class="hint">이 페이지에 수록된 판례의 사건명·사건번호·전문에서 검색합니다.</p></form>'''
+
+def sources_body():return '''<p class="breadcrumbs"><a href="../">판례 자료실</a> / 출처·수집 기준</p><div class="page-head"><p class="eyebrow">Provenance &amp; scope</p><h1 class="page-title">어디에서 가져왔고,<br>어떻게 공개하나요?</h1><p class="lead">공개된 판결문과 이용 조건을 함께 확인합니다. 저작권 제외와 무제한 기계 수집 허가는 서로 다른 문제입니다.</p></div><div class="prose"><h2>01. 현재 수록 범위</h2><p>대한민국 국가법령정보센터에서 개별 확인한 공개 판례를 순차 수록합니다. 한국 전체 판례, 모든 공개 판결 또는 모든 최신 판례를 확보했다는 뜻은 아닙니다. 수록 건수는 메인과 국가 목록에 실제 공개 건수만 표시합니다. 각 판례는 하나의 고정된 페이지를 갖습니다.</p><h2>02. 대한민국</h2><p><a href="https://www.law.go.kr/lsLinkCommonInfo.do?chrClsCd=010202&amp;lsJoLnkSeq=1029423769">저작권법 제7조 제3호</a>는 법원의 판결·결정·명령을 보호받지 못하는 저작물로 정합니다. 민간 출판사의 해설·주석·독창적인 편집물을 이 원칙만으로 복제하지 않습니다.</p><p><a href="https://open.law.go.kr/LSO/usrJoin.do">법제처 법령정보 공동활용 이용 안내</a>의 출처 표시 및 제3자 권리 보호 조건을 따릅니다. 과도한 호출에 대한 제한을 존중하고, 인증이 필요한 API는 등록된 이용 자격이 있을 때만 이용합니다. 테스트용 인증값을 운영 수집에 사용하지 않습니다.</p><p><a href="https://open.law.go.kr/LSO/openApi/guideResult.do?htmlName=precInfoGuide">공식 판례 본문 API 안내</a> · <a href="https://openapi.scourt.go.kr/kgso000m04.do">사법정보공유포털 저작권 보호정책</a></p><h2>03. 비실명 처리와 원문 보존</h2><p>공식 공개본의 ‘원고’, ‘피고’, ‘소외’ 및 가림표를 그대로 보존하며, 당사자를 추정하거나 다른 자료와 결합해 재식별하지 않습니다. 주문과 이유 등 판결문 전문을 확인하고 출처의 판시사항·판결요지와 구분합니다. 공개된 법률대리인·재판부의 직무상 성명은 원문에 따릅니다.</p><p>판결문에 표·그림·수식·별첨이 있으면 검토 대상에 포함합니다. 재현하지 못한 요소는 누락 위치와 범위를 밝히거나 완전한 전문으로 공개하지 않습니다. 각 페이지의 원문 범위·추출 제한과 공식 출처를 함께 확인하세요.</p><h2 id="international">04. 해외 확대</h2><h3>인도 · 수록 준비</h3><p><a href="https://copyright.gov.in/Copyright_Act_1957/chapter_xi.html">인도 저작권법 제52조 제1항 (q)(iv)</a>는 법원·재판소가 금지하지 않은 판결·명령의 복제와 공표를 허용합니다. Eastern Book Company v. D.B. Modak 판결은 원판결문과 보호될 수 있는 독창적인 편집 기여를 구분합니다. 모든 민간 판례집이 저작권 자유라는 뜻은 아닙니다.</p><p><a href="https://www.wipo.int/wipolex/en/judgments/details/2840">WIPO의 판결 기록</a> · <a href="https://www.sci.gov.in/website-policies/">인도 대법원 웹사이트 정책</a> · <a href="https://scr.sci.gov.in/scrsearch/">공식 eSCR 검색</a></p><p>공식 자료의 접근 조건, 재공표 금지 여부, 개인정보 보호와 수집 경로를 확인한 뒤 공개합니다. CAPTCHA·인증·방화벽을 우회해 수집하지 않습니다. 아직 인도 판례는 수록하지 않았습니다.</p><h3>다른 관할</h3><p>국가별 법률 및 공식 출처의 이용 조건을 확인해 별도로 추가합니다. 한 국가의 재이용 조건을 다른 국가에 적용하지 않습니다.</p><h2>05. 갱신과 정정</h2><p>각 판례에 선고일, 최초 수집일, 최종 검토일, 공식 URL과 본문 해시를 기록합니다. 사건번호·법원·선고일·원문 URL·본문 해시로 중복을 확인합니다. 추가된 페이지는 해당 자료실 사이트맵에 반영되며 NaNa Lab 루트 사이트맵에 연결합니다. 이후 원문이 정정되거나 공개 중단된 경우 재검토 대상이 됩니다.</p><p>누락·오류·비실명 처리에 관한 의견은 <a href="https://nanalab.kr/#contact">NaNa Lab 문의</a>로 정확한 판례 URL과 함께 알려주세요. 법률 자문 서비스가 아니며 법원 인증등본을 대신하지 않습니다.</p><h2>06. 사이트 운영</h2><p>자체 인터페이스와 공식 판결문은 권리 범위를 구분합니다. 사이트에는 NaNa Lab의 공통 방문 분석 및 광고 로더가 포함됩니다. 광고 송출 여부와 분석 수신은 서비스 제공자 설정에 따라 달라질 수 있습니다.</p></div>'''
+
+def build():
+    ds=records(); updated=max([d['retrievedAt'][:10] for d in ds]+[TODAY]); n=len(ds);out={}
+    country=f'''<div class="country-grid"><a class="country-card" href="./kr/"><span class="code">KR · REPUBLIC OF KOREA</span><h3>대한민국</h3><p>국가법령정보센터의 공식 공개 판결문</p><div class="count"><strong>{n:,}건 수록</strong><span>↗</span></div></a><a class="country-card pending" href="./sources/#international"><span class="code">IN · INDIA</span><h3>인도</h3><p>원판결문 권리·접근 조건 검토</p><div class="count"><span>수록 준비</span><span>↗</span></div></a><a class="country-card pending" href="./sources/#international"><span class="code">NEXT · INTERNATIONAL</span><h3>다음 관할</h3><p>국가별 공식 출처와 재이용 조건 확인</p><div class="count"><span>단계별 확대</span><span>↗</span></div></a></div>'''
+    home=f'''<section class="hero"><div><p class="eyebrow">Open judgments · Original sources</p><h1>판결의 기록을,<br><em>누구나 읽을 수 있게.</em></h1><p class="lead">대한민국부터 시작하는 공개 판례 자료실.<br>공식 출처를 확인한 판결문을 한 건씩, 원문 그대로 쌓습니다.</p><span class="status-pill">순차 수록 중 · 전체 판례가 아닙니다</span></div><div class="hero-note"><strong>{n:,}</strong><div><span>현재 공개된 판례</span><span>갱신 {updated.replace('-','. ')}</span></div></div></section>{search()}<section><div class="section-head"><h2>국가별 자료실</h2><a href="./sources/">수집 기준 보기 ↗</a></div>{country}</section><section><div class="section-head"><h2>최근 선고일순 판례</h2><span>원문 언어 · 개별 페이지</span></div><p class="results-status" data-results>현재 목록 {n}건</p>{cards(ds,'./')}<div class="empty" data-no-results hidden><h3>일치하는 판례가 없습니다.</h3><p>검색어를 줄이거나 사건번호를 확인해 주세요. 미수록 판례는 검색되지 않습니다.</p></div></section><section class="principles" aria-label="공개 원칙"><div><span>01 / ORIGINAL</span><h3>공식 원문을 기준으로</h3><p>판결문과 민간 해설을 구분하고, 모든 문서에 공식 출처를 남깁니다.</p></div><div><span>02 / TRACEABLE</span><h3>판례 한 건, 페이지 하나</h3><p>사건번호·선고일·수집일·본문 해시를 기록해 출처와 변화를 확인합니다.</p></div><div><span>03 / RESPONSIBLE</span><h3>공개 범위를 지킵니다</h3><p>원문의 비실명 처리를 유지하고 국가별 이용 조건을 검토합니다.</p></div></section>'''
+    out['index.html']=page('index.html','판례 자료실','공식 출처를 확인한 대한민국 판결문을 건별 HTML로 읽는 공개 판례 자료실. 출처·선고일·수집 범위를 함께 확인하세요.',home)
+    k=f'''<p class="breadcrumbs"><a href="../">판례 자료실</a> / 대한민국</p><div class="page-head"><p class="eyebrow">KR · Republic of Korea</p><h1 class="page-title">대한민국 판례</h1><p class="lead">공식 공개 판결문 {n:,}건. 원문의 비실명 처리를 유지하며 순차 수록합니다.</p><div class="notice">한국 판례 전체를 수록한 목록이 아닙니다. 법원 인증등본이 아닌 국가법령정보센터의 공개 전문 텍스트입니다.</div></div>{search()}<div class="section-head"><h2>판례 목록</h2><span>선고일 최신순</span></div><p class="results-status" data-results>현재 목록 {n}건</p>{cards(ds,'../')}<div class="empty" data-no-results hidden><h3>검색 결과가 없습니다.</h3><p>검색어를 줄이거나 다른 사건번호를 입력해 주세요.</p></div>'''
+    out['kr/index.html']=page('kr/index.html','대한민국 판례',f'공식 출처를 확인한 대한민국 판례 {n}건. 사건번호와 판결문 문구로 검색하고 원문을 읽으세요.',k,'대한민국')
+    out['sources/index.html']=page('sources/index.html','출처·수집 기준','판례 자료실의 공식 출처, 저작권과 재이용 조건, 비실명 처리 및 수록 범위를 확인하세요.',sources_body(),'출처·수집 기준')
+    for i,d in enumerate(ds):
+        path=f"kr/cases/{d['id']}/index.html";rel='../../../';title=f"{d['title']} · {d['court']} {d['caseNumber']}";sections=''.join(f'<section id="section-{j}"><h2>{E(s["heading"])}'+(' <small class="fineprint">탐색용 표제</small>' if s.get('headingAddedForNavigation') else '')+f'</h2><div class="text">{E(s["text"])}</div></section>' for j,s in enumerate(d['sections']))
+        toc=''.join(f'<li><a href="#section-{j}">{E(s["heading"])}</a></li>' for j,s in enumerate(d['sections']))
+        limitations=''.join(f'<li>{E(x)}</li>' for x in d['limitations'])
+        body=f'''<p class="breadcrumbs"><a href="{rel}">판례 자료실</a> / <a href="../../">대한민국</a> / {E(d['caseNumber'])}</p><div class="page-head"><p class="eyebrow">{E(d['court'])} · {d['decisionDate']} 선고</p><h1 class="page-title">{E(d['title'])}</h1><p class="lead">{E(d['court'])} {E(d['caseNumber'])} 판결</p><span class="status-pill">공식 공개 전문 · 비실명 표기 유지</span></div><div class="notice">출처: {E(d['sourceName'])}. 아래는 공식 페이지의 ‘전문’ 영역입니다. 판시사항·판결요지와 구분해 제공합니다. 법원 인증등본은 아니며, 법적 판단 전 <a href="{E(d['sourceUrl'])}" rel="noopener noreferrer" target="_blank">공식 원문 ↗</a>을 확인하세요.</div><div class="article-grid"><article class="judgment" aria-label="판결문 전문">{sections}<div class="fineprint"><h2>원문 범위와 추출 안내</h2><ul>{limitations}</ul></div></article><aside class="meta" aria-label="판례 정보"><dl><div><dt>법원</dt><dd>{E(d['court'])}</dd></div><div><dt>사건번호</dt><dd>{E(d['caseNumber'])}</dd></div><div><dt>선고일</dt><dd>{d['decisionDate']}</dd></div><div><dt>최초 수집일</dt><dd>{d['retrievedAt'][:10]} (UTC)</dd></div><div><dt>최종 검토일</dt><dd>{d['privacyReview']['reviewedAt'][:10]} (UTC)</dd></div><div><dt>공식 출처</dt><dd>{E(d['sourceName'])}</dd></div></dl><a class="button" href="{E(d['sourceUrl'])}" target="_blank" rel="noopener noreferrer">공식 원문 열기 ↗</a><div class="toc"><h2>판결문 목차</h2><ol>{toc}</ol></div><details><summary>출처·권리·본문 해시</summary><p class="fineprint">{E(d['rights']['basis'])}</p><p class="fineprint"><a href="{E(d['rights']['reuseNoticeUrl'])}">공식 재이용 안내</a> · <a href="{rel}sources/">수집 기준</a></p><p class="fineprint">전문 텍스트 SHA-256</p><p class="hash">{d['fullTextSha256']}</p><p class="fineprint">수집 원본 HTML SHA-256</p><p class="hash">{d['sourceHtmlSha256']}</p></details><p><button type="button" class="print-button" data-print>이 판결문 인쇄</button></p></aside></div><nav class="pagination" aria-label="판례 탐색"><a href="../../">← 대한민국 목록</a>'''+(f'<a href="../{ds[i+1]["id"]}/">다음 판례 →</a>' if i+1<len(ds) else '')+'</nav>'
+        structured={'@context':'https://schema.org','@type':'DigitalDocument','name':title,'url':BASE+path.removesuffix('index.html'),'inLanguage':'ko','datePublished':d['retrievedAt'][:10],'dateModified':d['privacyReview']['reviewedAt'][:10],'isBasedOn':d['sourceUrl'],'citation':d['sourceUrl'],'identifier':d['caseNumber'],'about':{'@type':'Thing','name':d['court']+' '+d['decisionDate']+' 선고 '+d['caseNumber']}}
+        out[path]=page(path,title,f"{d['court']} {d['decisionDate']} 선고 {d['caseNumber']} {d['title']} 판결. 공식 공개 전문과 출처·권리·비실명 처리 안내.",body,'대한민국',structured)
+    urls=[BASE+p.removesuffix('index.html') for p in out]
+    assert len(urls)<45000,'Partition static lists and leaf sitemaps before exceeding 45,000 pages'
+    out['sitemap.xml']='<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'+''.join(f'  <url><loc>{E(u)}</loc><lastmod>{updated}</lastmod></url>\n' for u in urls)+'</urlset>\n'
+    out['publication.json']=json.dumps({'schemaVersion':1,'updated':updated,'caseCount':n,'jurisdictions':{'KR':n},'scope':'Selected reviewed judgments; not exhaustive','oneCasePerPage':True,'cases':[{'id':d['id'],'url':BASE+f"kr/cases/{d['id']}/",'sourceUrl':d['sourceUrl'],'fullTextSha256':d['fullTextSha256']} for d in ds]},ensure_ascii=False,indent=2)+'\n'
+    return out
+
+if __name__=='__main__':
+    out=build();check='--check' in sys.argv
+    for path,text in out.items():
+        p=ROOT/path
+        if check:assert p.is_file() and p.read_text()==text,'Stale generated file: '+path
+        else:p.parent.mkdir(parents=True,exist_ok=True);p.write_text(text)
+    print(json.dumps({'status':'checked' if check else 'built','caseCount':len(records()),'outputs':len(out)},ensure_ascii=False))
