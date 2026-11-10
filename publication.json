@@ -1,13 +1,19 @@
 {
   "schemaVersion": 1,
   "updated": "2026-11-10",
-  "caseCount": 2,
+  "caseCount": 3,
   "jurisdictions": {
-    "KR": 2
+    "KR": 3
   },
   "scope": "Selected reviewed judgments; not exhaustive",
   "oneCasePerPage": true,
   "cases": [
+    {
+      "id": "kr-law-241101",
+      "url": "https://nanalab.kr/case-law-portal/kr/cases/kr-law-241101/",
+      "sourceUrl": "https://www.law.go.kr/LSW/precInfoP.do?precSeq=241101",
+      "fullTextSha256": "d60c9bab50820555a01906f0bbbbee7bc928054fb3dfbcace066e24fe15f7285"
+    },
     {
       "id": "kr-law-240883",
       "url": "https://nanalab.kr/case-law-portal/kr/cases/kr-law-240883/",
