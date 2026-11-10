@@ -14,6 +14,12 @@ def canonical_source_url(url):
     return url
 
 
+def assert_unheld_source(url, ledger):
+    digest=hashlib.sha256(canonical_source_url(url).encode()).hexdigest()
+    if any(entry['sourceUrlSha256']==digest for entry in ledger['entries']):
+        raise ValueError('Source is quarantined; a separate documented review must resolve the ledger hold before import')
+
+
 def lookup(url, publication, ledger):
     url=canonical_source_url(url)
     for case in publication['cases']:

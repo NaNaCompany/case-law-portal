@@ -6,7 +6,7 @@ import unittest
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / 'scripts'))
 from build import ROOT
-from check_candidate import lookup
+from check_candidate import lookup,assert_unheld_source,canonical_source_url
 
 
 class CandidateLedger(unittest.TestCase):
@@ -26,6 +26,13 @@ class CandidateLedger(unittest.TestCase):
     def test_unknown_source_requires_review(self):
         result = lookup('https://example.test/new', {'cases': []}, {'entries': []})
         self.assertEqual(result['status'], 'needs-source-review')
+
+    def test_import_must_resolve_existing_quarantine(self):
+        canonical='https://www.law.go.kr/LSW/precInfoP.do?precSeq=123456789'
+        ledger={'entries':[{'sourceUrlSha256':hashlib.sha256(canonical.encode()).hexdigest(),
+                            'status':'held-for-review','automaticRetry':False}]}
+        with self.assertRaisesRegex(ValueError,'quarantined'):
+            assert_unheld_source('https://law.go.kr/precInfoP.do?precSeq=123456789',ledger)
 
     def test_ledger_has_no_unpublished_urls_or_personal_content(self):
         data = json.loads((ROOT / 'data/review-ledger.json').read_text())

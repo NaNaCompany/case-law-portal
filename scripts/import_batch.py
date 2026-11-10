@@ -12,6 +12,7 @@ import sys
 
 from build import ROOT, records, source_digest, validate_record
 from privacy_gate import validate_contextual_privacy
+from check_candidate import assert_unheld_source
 
 
 def adjacent(base, filename):
@@ -42,6 +43,7 @@ def preflight(manifest):
         filename = entry.get('file') or identifier.removeprefix('kr-law-') + '.json'
         path = adjacent(manifest.parent, filename)
         record = validate_record(json.loads(path.read_text()))
+        assert_unheld_source(record['sourceUrl'],json.loads((ROOT/'data/review-ledger.json').read_text()))
         if record['id'] != identifier:
             raise ValueError('Manifest identifier differs from reviewed record')
         for field in ('fullTextSha256', 'sourceHtmlSha256', 'sourcePdfSha256'):

@@ -6,9 +6,11 @@ from pathlib import Path
 import hashlib,json,sys
 from build import ROOT,validate_record,records,build,source_digest,image_asset
 from privacy_gate import validate_contextual_privacy
+from check_candidate import assert_unheld_source
 
 def main():
     p=Path(sys.argv[1]).resolve();d=json.loads(p.read_text());validate_record(d)
+    assert_unheld_source(d['sourceUrl'],json.loads((ROOT/'data/review-ledger.json').read_text()))
     source=(p.parent/d['sourcePdfFile' if d.get('sourceType')=='pdf' else 'sourceHtmlFile']).resolve()
     assert source.parent==p.parent,'Original source must be adjacent to record'
     assert hashlib.sha256(source.read_bytes()).hexdigest()==source_digest(d),'Original HTML hash mismatch'
