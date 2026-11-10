@@ -24,4 +24,9 @@ class Integrity(unittest.TestCase):
    if d.get('sourceType')=='pdf':bad['review']['pdfCompleteness']['rasterImages']+=1
    else:bad['review']['domCompleteness']['nonTextElementCounts']['table']=1
    with self.assertRaises(AssertionError):validate_record(bad)
+ def test_reject_invented_neutral_citation(self):
+  for d in records():
+   if d.get('neutralCitation'):
+    bad=copy.deepcopy(d);bad['neutralCitation']='2999 INSC 999999'
+    with self.assertRaises(AssertionError):validate_record(bad)
 if __name__=='__main__':unittest.main()
