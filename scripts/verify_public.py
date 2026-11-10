@@ -65,7 +65,7 @@ def fetch(url):
     return data
 
 
-def verify(get=fetch):
+def verify(get=fetch, workers=1):
     expected = json.loads((ROOT / 'publication.json').read_text())
     if json.loads(get(BASE + 'publication.json')) != expected:
         raise ValueError('Published manifest does not match this checkout')
@@ -96,9 +96,9 @@ def verify(get=fetch):
                 raise ValueError('Modified published source image: ' + record['id'])
             image_count += 1
         return record['id'], image_count
-    # This bounded parallelism checks only our own deployment, never source courts.
+    # Default to sequential reads. Optional bounded concurrency never targets courts.
     image_count = 0
-    with ThreadPoolExecutor(max_workers=3) as pool:
+    with ThreadPoolExecutor(max_workers=workers) as pool:
         for identifier, images in pool.map(check_record, ds):
             image_count += images
             print(identifier, 'verified', flush=True)
@@ -126,8 +126,10 @@ def verify(get=fetch):
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--report', type=Path, help='Optional local JSON report path')
+    parser.add_argument('--workers', type=int, choices=(1, 2, 3), default=1,
+                        help='Concurrent checks of our own deployment (default: 1)')
     args = parser.parse_args()
-    result = verify()
+    result = verify(workers=args.workers)
     text = json.dumps(result, ensure_ascii=False, indent=2) + '\n'
     if args.report:
         args.report.parent.mkdir(parents=True, exist_ok=True)
