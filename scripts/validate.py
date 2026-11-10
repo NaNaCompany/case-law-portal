@@ -9,8 +9,8 @@ class Page(HTMLParser):
         d=dict(attrs)
         if 'id' in d:self.ids.append(d['id'])
         if tag=='link' and d.get('rel')=='canonical':self.canonical.append(d.get('href'))
-        if tag in ('a','script','link'):
-            u=d.get('href') if tag!='script' else d.get('src')
+        if tag in ('a','script','link','img'):
+            u=d.get('href') if tag not in ('script','img') else d.get('src')
             if u:self.links.append(u)
         if tag=='article' and d.get('class')=='judgment':self.caseBodies+=1
 out=build();ds=records();htmls={}
@@ -38,4 +38,15 @@ assert set(locs)=={BASE+p.removesuffix('index.html') for p in htmls}
 assert sum(p.caseBodies for p in htmls.values())==len(ds)
 assert len(list(ROOT.glob('*/cases/*/index.html')))==len(ds),'Orphan case page'
 manifest=json.loads(out['publication.json']);assert manifest['caseCount']==len(ds)
+for country,count in manifest['jurisdictions'].items():
+    listing=(ROOT/country.lower()/'index.html').read_text()
+    assert listing.count('data-case ')==count,'Country list count mismatch'
+    for d in ds:
+        if d['jurisdiction']==country:assert f"{country.lower()}/cases/{d['id']}/" in listing,'Case missing from country list'
+for d in ds:
+    detail=(ROOT/d['jurisdiction'].lower()/'cases'/d['id']/'index.html').read_text()
+    if d.get('subsequentHistory'):assert 'history-notice' in detail,'Missing subsequent history warning'
+    if d.get('sourceType')=='pdf':
+        assert detail.count('class="text pdf-text"')==len(d['sections']),'PDF layout class missing'
+        assert detail.count('class="source-figure"')==len(d.get('sourceImages',[])),'Source image missing from page'
 print(json.dumps({'status':'passed','cases':len(ds),'htmlPages':len(htmls),'sitemapUrls':len(locs),'checks':['deterministic build','metadata and rights review','text and section integrity','deduplication','local links and anchors','canonical URLs','publisher tags','one case per page','sitemap exact coverage']}))

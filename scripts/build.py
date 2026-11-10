@@ -13,12 +13,15 @@ COUNTRY_NAMES={'KR':'대한민국','IN':'인도'}
 def case_path(d):return f"{d['jurisdiction'].lower()}/cases/{d['id']}/"
 def source_digest(d):return d['sourcePdfSha256'] if d.get('sourceType')=='pdf' else d['sourceHtmlSha256']
 def source_label(d):return 'PDF' if d.get('sourceType')=='pdf' else 'HTML'
+def image_asset(d,image):return f"assets/cases/{d['id']}/{image['id']}"+{'image/png':'.png','image/jpeg':'.jpg'}[image['mimeType']]
 
 def validate_record(d):
     required=['id','jurisdiction','court','caseNumber','decisionDate','title','sourceUrl','sourceName','retrievedAt','fullTextSha256','sections','fullText','rights','privacyReview','limitations','review']
     assert all(k in d for k in required),'Missing mandatory metadata'
     assert re.fullmatch(r'[a-z]{2}-[a-z0-9-]+',d['id']),'Unsafe ID'
     assert d['jurisdiction'] in COUNTRY_NAMES,'Jurisdiction requires a reviewed source policy'
+    assert d['id'].startswith(d['jurisdiction'].lower()+'-'),'Mismatched country ID'
+    assert re.fullmatch(r'\d{4}-\d{2}-\d{2}',d['decisionDate']),'Decision date must be YYYY-MM-DD'
     assert d['title'] not in ('판례정보','',None),'Missing case title'
     datetime.fromisoformat(d['decisionDate']);datetime.fromisoformat(d['retrievedAt'])
     assert re.fullmatch('[0-9a-f]{64}',source_digest(d)),'Missing original-source hash'
@@ -40,12 +43,26 @@ def validate_record(d):
         assert not re.search(r'\b\d{6}[- ]?[1-4]\d{6}\b|\b01[016789][- ]?\d{3,4}[- ]?\d{4}\b',d['fullText']),'Possible sensitive identifier'
     else:
         assert d.get('sourceType')=='pdf' and d.get('language')=='en','Unreviewed Indian source format'
-        assert re.fullmatch(r'https://api\.sci\.gov\.in/(?:judgment|jonew)/judis/\d+\.pdf',d['sourceUrl']),'Unreviewed source'
+        assert re.fullmatch(r'https://api\.sci\.gov\.in/(?:(?:judgment|jonew)/judis/\d+|supremecourt/\d{4}/\d+/[A-Za-z0-9_.-]+)\.pdf',d['sourceUrl']),'Unreviewed source'
         assert d['review'].get('publicationRestrictionChecked') is True and d['rights'].get('publicationRestrictionReview'),'Publication restrictions not reviewed'
         assert d['privacyReview']['status']=='reviewed-public-official-civil-commercial-judgment','Public civil/commercial source review missing'
         check=d['review'].get('pdfCompleteness',{})
         assert check.get('pageCount')==check.get('textPages')==len(d['sections']),'Missing PDF pages'
-        assert check.get('scanOnlyPages')==0 and check.get('rasterImages')==0,'Image-bearing source needs additional renderer/review'
+        assert check.get('scanOnlyPages')==0,'Scan-only source needs an OCR review workflow'
+        images=d.get('sourceImages',[])
+        assert check.get('rasterImages')==len(images),'Not every source raster image is accounted for'
+        assert len({image.get('id') for image in images})==len(images),'Duplicate source image ID'
+        for image in images:
+            assert re.fullmatch(r'[a-z0-9-]+',image.get('id','')),'Unsafe image ID'
+            assert image.get('mimeType') in ('image/png','image/jpeg'),'Unreviewed image format'
+            assert re.fullmatch(r'[0-9a-f]{64}',image.get('sha256','')),'Image source hash missing'
+            assert isinstance(image.get('page'),int) and 1<=image['page']<=check['pageCount'],'Image page missing'
+            assert image.get('role')=='official-qr-code','Source image needs substantive review'
+            ir=image.get('review',{})
+            assert all(ir.get(k) is True for k in ['verified','pixelEqualityVerified','decodedPayloadVerified']) and ir.get('containsCredentialOrNonpublicPersonalData') is False and ir.get('payloadType')=='public-neutral-citation-only','Source image needs pixel and privacy review'
+            assert check.get('allRasterImagesAccountedFor') is True and check.get('preservedRasterImages')==len(images) and check.get('omittedRasterImages')==0,'Incomplete image preservation'
+            assert image.get('caption'),'Image attribution caption missing'
+            if image.get('assetPath'):assert image['assetPath']==image_asset(d,image),'Unexpected image asset path'
         assert all(x.get('rendering')=='preformatted' and x.get('preserveWhitespace') is True for x in d['sections']),'PDF layout preservation missing'
         assert '\f'.join(x['text'] for x in d['sections'])+'\f'==d['fullText'],'Section/body integrity mismatch'
     if d.get('subsequentHistory'):
@@ -55,6 +72,10 @@ def validate_record(d):
 
 def records():
     ds=[validate_record(json.loads(p.read_text())) for p in sorted((ROOT/'data/cases').glob('*.json'))]
+    for d in ds:
+        for image in d.get('sourceImages',[]):
+            asset=ROOT/image_asset(d,image)
+            assert asset.is_file() and hashlib.sha256(asset.read_bytes()).hexdigest()==image['sha256'],'Missing or modified source image'
     for key in [lambda d:d['id'],lambda d:d['sourceUrl'],lambda d:d['fullTextSha256'],lambda d:(d['jurisdiction'],d['court'],d['caseNumber'],d['decisionDate'])]:
         values=[key(d) for d in ds];assert len(values)==len(set(values)),'Duplicate judgment'
     return sorted(ds,key=lambda d:(d['decisionDate'],d['id']),reverse=True)
@@ -97,7 +118,7 @@ def build():
         out['in/index.html']=page('in/index.html','인도 판례',f'인도 대법원의 공식 공개 판결문 {inn}건. 원문 영어·출처·판결일·재이용 조건을 함께 제공합니다.',india)
         out['sources/index.html']=out['sources/index.html'].replace('인도 · 수록 준비','인도 · 공식 원문 수록').replace('아직 인도 판례는 수록하지 않았습니다.',f'인도 대법원 공식 PDF 원문을 {inn}건 수록했습니다.').replace('대한민국 국가법령정보센터에서 개별 확인한 공개 판례를 순차 수록합니다.','대한민국 국가법령정보센터와 인도 대법원 공식 자료에서 개별 확인한 공개 판례를 순차 수록합니다.')
     for i,d in enumerate(ds):
-        path=case_path(d)+"index.html";rel='../../../';title=f"{d['title']} · {d['court']} {d['caseNumber']}";sections=''.join(f'<section id="section-{j}"><h2>{E(s["heading"])}'+(' <small class="fineprint">탐색용 표제</small>' if s.get('headingAddedForNavigation') else '')+f'</h2><div class="text'+(' pdf-text' if s.get('rendering')=='preformatted' else '')+f'" lang="{E(d.get("language","ko"))}"'+(' tabindex="0" role="region" aria-label="'+E(s['heading'])+' 원문 고정폭 텍스트"' if s.get('rendering')=='preformatted' else '')+f'>{E(s["text"])}</div></section>' for j,s in enumerate(d['sections']))
+        path=case_path(d)+"index.html";rel='../../../';title=f"{d['title']} · {d['court']} {d['caseNumber']}";sections=''.join(f'<section id="section-{j}"><h2>{E(s["heading"])}'+(' <small class="fineprint">탐색용 표제</small>' if s.get('headingAddedForNavigation') else '')+f'</h2><div class="text'+(' pdf-text' if s.get('rendering')=='preformatted' else '')+f'" lang="{E(d.get("language","ko"))}"'+(' tabindex="0" role="region" aria-label="'+E(s['heading'])+' 원문 고정폭 텍스트"' if s.get('rendering')=='preformatted' else '')+f'>{E(s["text"])}</div>'+''.join(f'<figure class="source-figure"><img src="{rel}{image_asset(d,im)}" alt="{E(im["caption"])}" loading="lazy"><figcaption lang="ko">{E(im["caption"])} · 공식 PDF {im["page"]}쪽에서 추출. 문서 서명을 인증하는 표시가 아닙니다.</figcaption></figure>' for im in d.get('sourceImages',[]) if im['page']==j+1)+'</section>' for j,s in enumerate(d['sections']))
         toc=''.join(f'<li><a href="#section-{j}">{E(s["heading"])}</a></li>' for j,s in enumerate(d['sections']))
         limitations=''.join(f'<li>{E(x)}</li>' for x in d['limitations'])
         history=d.get('subsequentHistory');history_note=(f'<div class="notice history-notice"><strong>후속 판례 안내</strong><p>{E(history["notice"])}</p><a href="{E(history["sourceUrl"])}">{E(history["court"])} {history["decisionDate"]} 선고 {E(history["successorCaseNumber"])} 공식 원문 ↗</a></div>' if history else '')
