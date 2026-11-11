@@ -6,7 +6,7 @@ from privacy_gate import validate_contextual_privacy
 ROOT=Path(__file__).resolve().parents[1]
 BASE='https://nanalab.kr/case-law-portal/'
 E=lambda value:html.escape(str(value),quote=True)
-TODAY='2026-11-10'
+TODAY='2026-11-11'
 
 def sha(text): return hashlib.sha256(text.encode()).hexdigest()
 COUNTRY_NAMES={'KR':'대한민국','IN':'인도'}

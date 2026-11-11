@@ -1,10 +1,10 @@
 {
   "schemaVersion": 1,
-  "updated": "2026-11-10",
-  "caseCount": 75,
+  "updated": "2026-11-11",
+  "caseCount": 76,
   "privacyEditedCaseCount": 1,
   "jurisdictions": {
-    "KR": 65,
+    "KR": 66,
     "IN": 10
   },
   "scope": "Selected reviewed judgments; not exhaustive",
@@ -129,6 +129,12 @@
       "url": "https://nanalab.kr/case-law-portal/kr/cases/kr-law-241101/",
       "sourceUrl": "https://www.law.go.kr/LSW/precInfoP.do?precSeq=241101",
       "fullTextSha256": "d60c9bab50820555a01906f0bbbbee7bc928054fb3dfbcace066e24fe15f7285"
+    },
+    {
+      "id": "kr-law-238459",
+      "url": "https://nanalab.kr/case-law-portal/kr/cases/kr-law-238459/",
+      "sourceUrl": "https://www.law.go.kr/LSW/precInfoP.do?precSeq=238459",
+      "fullTextSha256": "66ccdc3996f18ec13116b86638acd3e9cbfdfd0c40e14c2d61fe66b8836f61d5"
     },
     {
       "id": "kr-law-240883",
